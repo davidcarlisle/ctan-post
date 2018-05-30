@@ -16,10 +16,11 @@
 -- Currently string values are not checked, eg licence names, or URL syntax.
 
 -- The input form could be used to constrict a post body but
--- luasec is not included in texlua, and curl etc is not reliably on the path
--- so the current version wraps a call to ctan-o-mat.
+-- luasec is not included in texlua.
 
--- as windows (since April 2018) includes curl now default to curl
+-- Instead an external prograp is used to post.
+-- As Windows (since April 2018) includes curl now default to curl.
+
 -- A global variable controls the backend to use.
 -- ctan_post_command=="curl"
 -- ctan_post_command=="ctan-o-mat"
@@ -81,7 +82,7 @@ function ctan_upload (c,upload)
   end
 
 
-  -- avoid lower level error from ctan-o-mat of zip file missing
+  -- avoid lower level error from post command if zip file missing
   local zip=io.open(trim_space(tostring(c.file)),"r")
   if zip~=nil then
     io.close(zip)
@@ -89,7 +90,7 @@ function ctan_upload (c,upload)
     error("missing zip file " .. tostring(c.file))
   end
 
-  -- call ctan-o-mat to validate the upload
+  -- call post command to validate the upload at CTAN's validate URL
   local exit_status=0
   local fp_return=""
   if ctan_post_command=="ctan-o-mat" then
@@ -108,7 +109,7 @@ function ctan_upload (c,upload)
     end
   end
 
-
+  -- if upload requested and validation succeeded repost to the upload URL
   if (exit_status==0 or exit_status==nil) then
     if(upload==true) then
       if ctan_post_command=="ctan-o-mat" then
@@ -154,7 +155,7 @@ function ctan_field(c,f,max,desc,mandatory,multi)
   end
 end
 
--- for url %-encoding but not used presently
+-- for URL %-encoding but not used presently
 local char_to_hex = function(c)
   return string.format("%%%02X", string.byte(c))
 end
@@ -173,7 +174,7 @@ function ctan_single_field(c,f,v,max,desc,mandatory)
         c.cfg:write("\n\\begin{" .. f .. "}\n" .. vs .. "\n\\end{" .. f .. "}\n")
       else
         if ctan_post_command=="curl" then
--- curl supports usong \" in " delimited strings but not \' in ' delimited omes
+-- curl supports using \" in " delimited strings but not \' in ' delimited omes
 --          c.cfg=c.cfg .." --form " .. f .. "='" .. vs:gsub("([^%w])",char_to_hex) .. "'"
           c.cfg=c.cfg .." --form " .. f .. '="' .. vs:gsub('"','\\"') .. '"'
         else
