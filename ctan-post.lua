@@ -96,7 +96,6 @@ function ctan_upload (c,upload)
     exit_status=os.execute("ctan-o-mat --validate ctan-upload.txt")
   else
     if ctan_post_command=="curl" then
-    	print('###' .. c.cfg) 
 --    use popen not execute so get the return body local exit_status=os.execute(c.cfg .. "validate")
       local fp = assert(io.popen(c.cfg .. "validate", 'r'))
       fp_return = assert(fp:read('*a'))
@@ -112,14 +111,17 @@ function ctan_upload (c,upload)
 
   if (exit_status==0 or exit_status==nil) then
     if(upload==true) then
-      print("upload disabled while testing")
       if ctan_post_command=="ctan-o-mat" then
---     exit_status=os.execute("ctan-o-mat ctan-upload.txt")
+        exit_status=os.execute("ctan-o-mat ctan-upload.txt")
       else
         if ctan_post_command=="curl" then
           local fp = assert(io.popen(c.cfg .. "upload", 'r'))
           fp_return = assert(fp:read('*a'))
           fp:close()
+--         this is just html, could save to a file
+--         or echo a cleaned up version
+          print('Response from CTAN:')
+          print(fp_return)
           if string.match(fp_return,"WARNING") or string.match(fp_return,"ERROR") then
             exit_status=1
           end
