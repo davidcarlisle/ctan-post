@@ -7,10 +7,10 @@ ctan={}
 
 ctan.pkg="ct"
 
---ctan.version={11.22,099} -- error 9table)
+--ctan.version={11.22,099} -- error (table)
 -- ctan.version= '2' -- OK coerced to string
-ctan.version=[[2018/05/20]] --OK
-
+--ctan.version=[[2018/05/20]] --OK
+ctan.version = input_single_line_field("version") -- interactive prompt
 
 ctan.author=[[me]]
 
@@ -28,10 +28,10 @@ pl]],'mit'}
 -- ctan.license="gpl"
 
 
-ctan.announcement=[[
-test announcement
-]]
-
+-- ctan.announcement=[[
+-- test announcement
+--]]
+ctan.announcement=input_multi_line_field("announcement")
 
 ctan.summary=[[summary ]]
 

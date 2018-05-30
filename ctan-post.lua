@@ -34,6 +34,7 @@
 
 
 ctan_post_command="curl"
+curl_debug=true -- posting is diabled while testing
 
 function ctan_upload (c,upload)
 
@@ -98,9 +99,14 @@ function ctan_upload (c,upload)
   else
     if ctan_post_command=="curl" then
 --    use popen not execute so get the return body local exit_status=os.execute(c.cfg .. "validate")
-      local fp = assert(io.popen(c.cfg .. "validate", 'r'))
-      fp_return = assert(fp:read('*a'))
-      fp:close()
+      if(curl_debug==false) then
+        local fp = assert(io.popen(c.cfg .. "validate", 'r'))
+        fp_return = assert(fp:read('*a'))
+        fp:close()
+      else
+       fp_return="WARNING: curl_debug==true: posting disabled disabled"
+       print(c.cfg)
+      end
       if string.match(fp_return,"WARNING") or string.match(fp_return,"ERROR") then
        exit_status=1
       end
@@ -185,5 +191,46 @@ function ctan_single_field(c,f,v,max,desc,mandatory)
   else
     error("The value of the field '" .. f .."' must be a scalar not a table")
   end
+end
+
+
+-- function for interactive multiline fields
+
+
+function input_multi_line_field (name)
+  print("Enter " .. name .. "  three <return> or ctrl-D to stop")
+
+  local field=""
+
+  local answer_line
+  local return_count=0
+  repeat
+    io.write("> ")
+    io.flush()
+    answer_line=io.read()
+    if answer_line=="" then
+      return_count=return_count+1
+    else
+      for i=1,return_count,1 do
+        field = field .. "\n"
+      end
+      return_count=0
+      if answer_line~=nil then
+        field = field .. "\n" .. answer_line
+      end
+     end
+  until (return_count==3 or answer_line==nil)
+  return field
+end
+
+function input_single_line_field(name)
+  print("Enter " .. name )
+
+  local field=""
+
+  io.write("> ")
+  io.flush()
+  field=io.read()
+  return field
 end
 
