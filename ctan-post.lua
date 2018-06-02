@@ -18,7 +18,7 @@
 -- The input form could be used to constrict a post body but
 -- luasec is not included in texlua.
 
--- Instead an external prograp is used to post.
+-- Instead an external program is used to post.
 -- As Windows (since April 2018) includes curl now default to curl.
 
 -- A global variable controls the backend to use.
@@ -33,8 +33,15 @@
 -- as a debugging aid.
 
 
+-- the main interface is
+-- ctan_upload (c,upload)
+-- with a configuration table c and optional upload parameter
+-- if upload is omitted or nil or false, onloy validation is attempted
+-- if upload is true the ctan upload URL will be used  after validation
+-- if upload is anything else, the user will beprompted whether to upload.
+
 ctan_post_command="curl"
-curl_debug=true -- posting is diabled while testing
+curl_debug=false -- posting is disabled while testing
 
 function ctan_upload (c,upload)
 
@@ -117,6 +124,16 @@ function ctan_upload (c,upload)
 
   -- if upload requested and validation succeeded repost to the upload URL
   if (exit_status==0 or exit_status==nil) then
+    if(upload ~=nil and upload ~=false and upload ~= true) then
+      print("Validation successful, do you want to upload to CTAN?" )
+      local answer=""
+      io.write("> ")
+      io.flush()
+      answer=io.read()
+      if(string.lower(answer,1,1)=="y") then
+        upload=true
+      end
+    end
     if(upload==true) then
       if ctan_post_command=="ctan-o-mat" then
         exit_status=os.execute("ctan-o-mat ctan-upload.txt")

@@ -21,8 +21,7 @@ ctan.uploader=[[me]]
 ctan.ctanPath=[[]]
 
 -- multiple licences, as a table
-ctan.license={[[l"
-pl]],'mit'}
+ctan.license={[[lppl]],'mit'}
 
 -- alternatively a singe license as a string
 -- ctan.license="gpl"
@@ -49,6 +48,6 @@ just to myself
 
 ctan.file="ct.zip"
 
-ctan_upload(ctan)
+ctan_upload(ctan,"ask")
 
 
